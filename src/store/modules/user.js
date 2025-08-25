@@ -8,17 +8,16 @@ const user = {
       nickName: '',
       avatar: '',
       signature: '',
-      homepageUrl: '',
       points: 0,
       commentNumber: 0,
-      userRank: 0,
+      registerRank: 0,
       email: '',
-      fansListVos: [],
-      msConcernListVos: [],
+      fanListVos: [],
+      concernListVos: [],
       background: '',
       concernTotal: 0,
       fansTotal: 0,
-      topicNumber: 0,
+      postNumber: 0,
       unreadCount: 0
     }
   },
@@ -28,17 +27,16 @@ const user = {
       state.user.nickName = payload.nickName || '';
       state.user.avatar = payload.avatar || '';
       state.user.signature = payload.signature || '';
-      state.user.homepageUrl = payload.homepageUrl || '';
       state.user.points = payload.points || 0;
       state.user.commentNumber = payload.commentNumber || 0;
-      state.user.userRank = payload.userRank || 0;
+      state.user.registerRank = payload.registerRank || 0;
       state.user.email = payload.email || '';
-      state.user.fansListVos = payload.fansListVos || [];
-      state.user.msConcernListVos = payload.msConcernListVos || [];
+      state.user.fanListVos = payload.fanListVos || [];
+      state.user.concernListVos = payload.concernListVos || [];
       state.user.background = payload.background || '';
       state.user.concernTotal = payload.concernTotal || 0;
       state.user.fanTotal = payload.fanTotal || 0;
-      state.user.topicNumber = payload.topicNumber || 0;
+      state.user.postNumber = payload.postNumber || 0;
       // 同步到本地
       localStorage.setItem('userInfo', JSON.stringify(state.user));
     },
@@ -61,17 +59,16 @@ const user = {
           nickName: '',
           avatar: '',
           signature: '',
-          homepageUrl: '',
           points: 0,
           commentNumber: 0,
-          userRank: 0,
+          registerRank: 0,
           email: '',
-          fansListVos: [],
-          msConcernListVos: [],
+          fanListVos: [],
+          concernListVos: [],
           background: '',
           concernTotal: 0,
           fansTotal: 0,
-          topicNumber: 0,
+          postNumber: 0,
           unreadCount: 0
         });
         resolve();

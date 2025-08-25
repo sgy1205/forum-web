@@ -69,7 +69,6 @@ export default {
     data() {
         return {
             debounce: false,
-            proxy: process.env.VUE_APP_PROXY_TARGET,
         };
     },
     created() {
@@ -88,7 +87,7 @@ export default {
             if (avatar.startsWith('http') || avatar.startsWith('https')) {
                 return avatar;
             }
-            return this.proxy + avatar;
+            return avatar;
         },
 
         // 处理富文本
@@ -125,7 +124,7 @@ export default {
                 this.$message.error('帖子未审核通过，无法点赞');
                 setTimeout(() => {
                     this.debounce = false;
-                }, 1000);
+                }, 2000);
                 return;
             }
             const data = {
@@ -141,12 +140,12 @@ export default {
                     this.$message.success(res.msg);
                     setTimeout(() => {
                         this.debounce = false;
-                    }, 1000);
+                    }, 2000);
                 }).catch(err => {
                     console.log(err);
                     setTimeout(() => {
                         this.debounce = false;
-                    }, 1000);
+                    }, 2000);
                 });
             } else if (status == 1) {
                 like(data).then(res => {
@@ -155,17 +154,17 @@ export default {
                     this.$message.success(res.msg);
                     setTimeout(() => {
                         this.debounce = false;
-                    }, 1000);
+                    }, 2000);
                 }).catch(err => {
                     setTimeout(() => {
                         this.debounce = false;
-                    }, 1000);
+                    }, 2000);
                 });
             } else {
                 this.$message.error('点赞状态异常');
                 setTimeout(() => {
                     this.debounce = false;
-                }, 1000);
+                }, 2000);
             }
         }
     }
@@ -173,21 +172,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 主题
-body.dark {
-    .post-node {
-        background-color: #3A3A3A !important;
-        color: #fff !important;
-    }
-
-    .user-name {
-        font-size: 14px;
-        color: white !important;
-
-    }
-}
 
 .post-item {
+    background-color: #ffffff;
     box-sizing: border-box;
     // width: 860px;
     // height: 100px;
@@ -196,11 +183,14 @@ body.dark {
     padding: 12px;
 
     .post-title {
+        text-align: left;
         font-weight: bold;
         margin-bottom: 10px;
     }
 
     .post-content {
+        text-align: left;
+        margin-top: 10px;
         font-size: 14px;
         color: #7a7a7a;
         display: -webkit-box;
@@ -248,7 +238,7 @@ body.dark {
         display: flex;
 
         .post-node {
-            background-color: #F2F6FF;
+            background-color: #ecb80e;
             padding: 6px;
             border-radius: 10px;
             cursor: pointer;

@@ -43,7 +43,7 @@ export function uploadImg(data) {
  */
 export function collection(params) {
     return request({
-        url: '/personalCenter/userCollection',
+        url: '/userCenter/userCollection',
         method: 'get',
         params
     })
@@ -55,7 +55,7 @@ export function collection(params) {
  */
 export function editUser(data) {
     return request({
-        url: '/personalCenter/updateUser',
+        url: '/userCenter/updateUserDetail',
         method: 'put',
         data
     })
@@ -67,10 +67,9 @@ export function editUser(data) {
  */
 export function changePassword(data) {
     return request({
-        url: '/personalCenter/updatePassword',
-        method: 'put',
-        data,
-        headers: { 'Content-Type': 'application/json' }
+        url: '/user/updatePassword',
+        method: 'post',
+        data
     })
 
 }
@@ -81,19 +80,18 @@ export function changePassword(data) {
  */
 export function changeEmail(params) {
     return request({
-        url: '/personalCenter/updateEmail',
+        url: '/userCenter/updateEmail',
         method: 'put',
-        params,
-
+        params
     })
 }
 /**
- * 获取用户积分
+ * 获取用户积分记录
  * @returns 
  */
 export function points(params) {
     return request({
-        url: '/personalCenter/pointsDtl',
+        url: '/point/list',
         method: 'get',
         params
     })
@@ -106,7 +104,7 @@ export function points(params) {
  */
 export function fansList(params) {
     return request({
-        url: '/concern/fanList',
+        url: '/concern/fansList',
         method: 'get',
         params
     })

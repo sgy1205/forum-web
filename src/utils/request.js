@@ -31,6 +31,7 @@ request.interceptors.response.use(
     }else if (res.data.code == 500) {
       // 如果响应状态码不是200，表示请求失败，显示错误信息
       Message.error(res.data.msg || '请求失败，请稍后再试')
+      return Promise.reject(res.data);
     }else if(res.data.code == 200){
       return res.data
     }else{

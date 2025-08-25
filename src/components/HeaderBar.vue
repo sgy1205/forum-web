@@ -6,8 +6,6 @@
                 <el-menu mode="horizontal" :router="true" class="nav-menu" :default-active="$route.path"
                     v-if="getToken()">
                     <el-menu-item index="/index">首页</el-menu-item>
-                    <el-menu-item index="/post">话题</el-menu-item>
-                    <el-menu-item index="/article">文章</el-menu-item>
                 </el-menu>
             </div>
             <div class="header-right">
@@ -46,7 +44,7 @@
                         <div class="user-info">
                             <div class="window">
                                 <img v-if="avatar" class="avatar" :src="avatar">
-                                <img v-else src="@/assets/images/默认头像.png" class="avatar" alt="">
+                                <!-- <img v-else src="@/assets/images/默认头像.png" class="avatar" alt=""> -->
                             </div>
                             <div class="user-name">
                                 {{ userName }}
@@ -102,6 +100,17 @@ export default {
             },
         };
     },
+    created() {
+        const cached = localStorage.getItem('userInfo');
+        if (cached) {
+            try {
+                this.$store.commit('setUserInfo', JSON.parse(cached));
+            } catch (e) {
+                console.warn('缓存的用户信息格式错误，已清除');
+                localStorage.removeItem('userInfo');
+            }
+        }
+    },
     computed: {
         // 先检查整个user状态是否存在
         userState() {
@@ -117,7 +126,7 @@ export default {
         },
         avatar() {
             const user = this.userInfo;
-            
+
             if (user.avatar?.startsWith('http') || user.avatar?.startsWith('https')) {
                 return user.avatar || localStorage.getItem('avatar') || require('@/assets/images/默认头像.png');
             } else if (user.avatar) {
@@ -190,7 +199,7 @@ export default {
                 this.goLogin();
                 return;
             }
-            
+
             if (this.$route.path === `/publish/${userId}` && this.$route.query.type === 'post' && this.$route.query.id === undefined) {
                 return;
             }
@@ -209,7 +218,7 @@ export default {
                 this.goLogin();
                 return;
             }
-            
+
             const mineoption = [
                 'personal',
                 'collection',
@@ -217,7 +226,7 @@ export default {
                 'message',
                 'editmine'
             ];
-            
+
             if (mineoption.includes(command)) {
                 let query = {};
                 if (command === 'collection') query.tab = 'collection';
@@ -265,11 +274,7 @@ export default {
                     localStorage.removeItem('userConcernTotal');
                     localStorage.removeItem('background');
 
-                    // 确保store存在再提交
-                    if (this.$store && this.$store.commit) {
-                        this.$store.commit('setUser', {});
-                    }
-                    
+
                     this.$router.push('/login').catch(() => { });
                     this.$message.success('退出登录成功');
                 }).catch(() => { });
@@ -335,6 +340,10 @@ export default {
                 width: 50px;
                 height: auto;
                 margin-right: 20px;
+            }
+
+            .nav-menu {
+                padding-left: 50px;
             }
 
             .el-menu-item {

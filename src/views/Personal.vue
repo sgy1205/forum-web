@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="achievement-item cursor">
                                     <div class="achievement-name ">注册排名</div>
-                                    <span class="achievement-value">{{ this.userInfo.rank || "未知" }}</span>
+                                    <span class="achievement-value">{{ this.userInfo.registerRank || "未知" }}</span>
                                 </div>
                             </div>
                         </div>
@@ -75,22 +75,12 @@
                                     <div class="user-signature-title">签名</div>
                                     <div class="user-signature">{{ this.userInfo.signature || '这个人很懒，什么都没有留下' }}</div>
                                 </div>
-                                <div class="user-center-box" v-show="!isCurrentUser">
-                                    <el-divider></el-divider>
-                                    <div class="user-center-row">
-                                        <div class="user-center-title">主页</div>
-                                        <a v-if="userInfo.homepageUrl" :href="`${userInfo.homepageUrl}${userInfo.id}`"
-                                            class="user-center tran">
-                                            {{ userInfo.homepageUrl }}</a>
-                                        <div v-else class="no-homepage">暂无主页</div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="fans pub-box tran">
                             <div class="diff-row">
                                 <div class="fans-title title" :key="this.userInfo.fanTotal">粉丝 {{ this.userInfo.fanTotal
-                                }}</div>
+                                    }}</div>
                                 <div class="more" @click="showFansAndFollow('fans')">更多</div>
                             </div>
                             <el-divider></el-divider>
@@ -228,28 +218,17 @@
                                 <template v-if="activeTabGroup === 'collection'">
                                     <el-tab-pane name="all">
                                         <span slot="label">
-                                            <i class="el-icon-view tab-icon"></i>全部
+                                            <i class="el-icon-chat-line-square tab-icon"></i>全部
                                         </span>
-                                        <div v-if="sortedCollection.length !== 0">
-                                            <PostItem v-for="(item, index) in sortedCollection" :key="index"
-                                                :item="item" :author-id="item.userId" :current-user-id="curId" />
-                                            <LoadMore :length="sortedCollection.length" :pagination="collectPagination"
-                                                @load-more="loadMore('collect')" @retract="retract('collect')" />
-                                        </div>
-                                        <el-empty v-else description="暂无收藏"></el-empty>
-                                    </el-tab-pane>
-                                    <el-tab-pane name="post">
-                                        <span slot="label">
-                                            <i class="el-icon-chat-line-square tab-icon"></i>话题
-                                        </span>
-                                        <div v-if="sortedCollection.filter(item => item.type == 'post').length !== 0">
+                                        <div v-if="collectList.length !== 0">
                                             <PostItem
-                                                v-for="(PostItem, index) in sortedCollection.filter(item => item.type == 'post')"
+                                                v-for="(PostItem, index) in collectList"
                                                 :key="index" :item="PostItem" :author-id="PostItem.userId"
                                                 :current-user-id="curId" />
                                             <LoadMore
-                                                :length="sortedCollection.filter(item => item.type == 'post').length"
-                                                :pagination="collectPagination" @load-more="loadMore('collect')"
+                                                :length="collectList.length"
+                                                :pagination="collectPagination" 
+                                                @load-more="loadMore('collect')"
                                                 @retract="retract('collect')" />
                                         </div>
                                         <el-empty v-else description="暂无话题"></el-empty>
@@ -333,7 +312,7 @@ export default {
                 try {
                     this.curId = newId;
                     this.userId = this.$store.state.user?.id || localStorage.getItem('userId') || '';
-                    
+
                     let curUserRes, userRes;
                     if (this.curId === this.userId) {
                         curUserRes = userRes = await curUser(this.userId);
@@ -347,7 +326,7 @@ export default {
                     const [postRes] = await Promise.all([
                         postList({ userId: this.curId, pageNum: this.postPagination.pageNum, pageSize: this.postPagination.pageSize }),
                     ]);
-                    
+
                     this.postList = postRes.rows || [];
                     this.postPagination.total = postRes.total;
                     this.concernList = curUserRes.data.concernListVos || [];
@@ -373,7 +352,7 @@ export default {
                 if (val === 'collection') {
                     this.activeTabGroup = 'collection';
                     this.activeTab = 'all';
-                    const collectRes = await collection({ userId: this.userId, pageNum: this.collectPagination.pageNum, pageSize: this.collectPagination.pageSize });
+                    const collectRes = await collection({ pageNum: this.collectPagination.pageNum, pageSize: this.collectPagination.pageSize });
                     this.collectList = collectRes.rows || [];
                     this.collectPagination.total = collectRes.total;
                 } else if (val === 'points') {
@@ -474,11 +453,6 @@ export default {
     computed: {
         unreadCount() {
             return this.$store.state.user.user.unreadCount || localStorage.getItem('unreadCount') || 0;
-        },
-        sortedCollection() {
-            return this.collectList.map(item => {
-                return { ...item, type: 'post' };
-            });
         },
         isCurrentUser() {
             if (!this.userId || !this.curId) return false;
@@ -713,20 +687,20 @@ export default {
                 if (this.moreFansList.length >= this.fansListPagination.total) {
                     return;
                 }
-                this.moreFansListPagination.pageSize += 5;
-                fansList({ userId: this.userId, pageNum: this.moreFansListPagination.pageNum, pageSize: this.moreFansListPagination.pageSize }).then(res => {
+                this.fansListPagination.pageSize += 5;
+                fansList({ userId: this.userId, pageNum: this.fansListPagination.pageNum, pageSize: this.fansListPagination.pageSize }).then(res => {
                     this.moreFansList = res.rows || [];
-                    this.moreFansListPagination.total = res.total;
+                    this.fansListPagination.total = res.total;
                 }).catch(err => {
                 });
             } else if (type === 'follow') {
                 if (this.moreFollowList.length >= this.followListPagination.total) {
                     return;
                 }
-                this.moreFollowListPagination.pageSize += 5;
-                followList({ userId: this.userId, pageNum: this.moreFollowListPagination.pageNum, pageSize: this.moreFollowListPagination.pageSize }).then(res => {
+                this.followListPagination.pageSize += 5;
+                followList({ userId: this.userId, pageNum: this.followListPagination.pageNum, pageSize: this.followListPagination.pageSize }).then(res => {
                     this.moreFollowList = res.rows || [];
-                    this.moreFollowListPagination.total = res.total;
+                    this.followListPagination.total = res.total;
                 }).catch(err => {
                 });
             } else if (type === 'post') {
@@ -764,27 +738,31 @@ export default {
         retract(type) {
             if (type === 'collect') {
                 this.collectPagination.pageSize = 5;
+                this.collectPagination.pageNum = 1;
                 collection({ pageNum: this.collectPagination.pageNum, pageSize: this.collectPagination.pageSize }).then(res => {
                     this.collectList = res.rows;
                     this.collectPagination.total = res.total;
                 }).catch(err => {
                 });
             } else if (type === 'fans') {
-                this.moreFansListPagination.pageSize = 5;
-                fansList({ pageNum: this.moreFansListPagination.pageNum, pageSize: this.moreFansListPagination.pageSize }).then(res => {
+                this.fansListPagination.pageSize = 5;
+                this.fansListPagination.pageNum = 1;
+                fansList({ userId: this.userId,pageNum: this.fansListPagination.pageNum, pageSize: this.fansListPagination.pageSize }).then(res => {
                     this.moreFansList = res.rows;
-                    this.moreFansListPagination.total = res.total;
+                    this.fansListPagination.total = res.total;
                 }).catch(err => {
                 });
             } else if (type === 'follow') {
-                this.moreFollowListPagination.pageSize = 5;
-                followList({ pageNum: this.moreFollowListPagination.pageNum, pageSize: this.moreFollowListPagination.pageSize, userId: this.userId }).then(res => {
+                this.followListPagination.pageSize = 5;
+                this.followListPagination.pageNum = 1;
+                followList({userId: this.userId, pageNum: this.followListPagination.pageNum, pageSize: this.followListPagination.pageSize, userId: this.userId }).then(res => {
                     this.moreFollowList = res.rows;
-                    this.moreFollowListPagination.total = res.total;
+                    this.followListPagination.total = res.total;
                 }).catch(err => {
                 });
             } else if (type === 'post') {
                 this.postPagination.pageSize = 5;
+                this.postPagination.pageNum = 1;
                 postList({ userId: this.curId, pageNum: this.postPagination.pageNum, pageSize: this.postPagination.pageSize }).then(res => {
                     this.postList = res.rows || [];
                     this.postPagination.total = res.total;
@@ -792,6 +770,7 @@ export default {
                 });
             } else if (type === 'points') {
                 this.pointsPagination.pageSize = 5;
+                this.pointsPagination.pageNum = 1;
                 points({ pageNum: this.pointsPagination.pageNum, pageSize: this.pointsPagination.pageSize }).then(res => {
                     this.pointsList = res.rows || [];
                     this.pointsPagination.total = res.total;
@@ -799,6 +778,7 @@ export default {
                 });
             } else if (type === 'msg') {
                 this.msgListPagination.pageSize = 5;
+                this.msgListPagination.pageNum = 1;
                 msgList({ pageNum: this.msgListPagination.pageNum, pageSize: this.msgListPagination.pageSize }).then(res => {
                     this.msgList = res.rows || [];
                     this.msgListPagination.total = res.total;
@@ -837,6 +817,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.content-list{
+    width: 100%;
+}
 // 全局居中样式
 .top-down {
     display: flex;
@@ -953,7 +936,7 @@ body.dark {
         }
 
         .user-col {
-            margin-left: 110px;
+            margin-left: 100px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -961,10 +944,12 @@ body.dark {
             color: black;
 
             .user-name {
+                text-align: left;
                 font-weight: bold;
             }
 
             .user-signature {
+                padding-top: 8px;
                 font-size: 14px;
             }
         }
@@ -1004,7 +989,7 @@ body.dark {
 
         .pub-box {
             padding: 10px;
-            width: 100%;
+            width: 300px;
             background-color: #FFFFFF;
             border-radius: 10px;
             box-sizing: border-box;
@@ -1061,38 +1046,15 @@ body.dark {
                 justify-content: center;
                 gap: 10px;
 
-                .user-name-row,
+                .user-name-row{
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0px 0 0px 0;
+                }
                 .user-signature-row {
                     display: flex;
                     justify-content: space-between;
-                    padding: 20px 0 10px 0;
-                }
-
-                .user-signature-row {
-                    padding: 10px 0 !important;
-                }
-
-                .user-center-box {
-                    .user-center-row {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 20px 0;
-                        gap: 10px;
-
-                        .user-center {
-                            display: inline-block;
-                            text-decoration: none;
-                            color: #296cff;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            flex: 1;
-
-                            &:hover {
-                                color: #709dff;
-                            }
-                        }
-                    }
+                    padding: 0px 0 10px 0;
                 }
             }
         }

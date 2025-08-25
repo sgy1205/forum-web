@@ -114,12 +114,14 @@ export default {
         flex-direction: column;
         justify-content: center;
         flex: 1;
+        text-align: left;
 
         .user-name {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 130px;
+            padding-bottom: 15px;
         }
 
         .user-signature {
