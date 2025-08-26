@@ -34,7 +34,7 @@
                         <el-form-item label="头像" prop="avatar">
                             <div class="avatar-section">
                                 <el-upload class="avatar-uploader" :show-file-list="false"
-                                    :on-change="handleAvatarChange" action="" v-model="userForm.avatar">
+                                    :on-change="handleAvatarChange" action="''" :auto-upload="false" v-model="userForm.avatar">
                                     <img :src="getAvatar(userForm.avatar)" class="avatar tran" />
                                 </el-upload>
                             </div>
@@ -159,7 +159,6 @@ export default {
             }
         };
         return {
-            proxyTarget: process.env.VUE_APP_PROXY_TARGET,
             userId: '',
             originForm: {},
             userForm: {
@@ -245,7 +244,7 @@ export default {
             if (avatar.startsWith('http') || avatar.startsWith('https')) {
                 return avatar;
             }
-            return this.proxyTarget + avatar;
+            return avatar;
         },
         // 重置
         resetForm(val) {
@@ -271,7 +270,6 @@ export default {
             };
             reader.readAsDataURL(file.raw);
             this.fileList = [file];
-
         },
         submit(who, mode) {
             // 个人资料
@@ -288,10 +286,10 @@ export default {
                             const file = this.fileList[0].raw;
                             console.log('上传的文件:', file);
                             const formData = new FormData();
-                            formData.append('files', file);
+                            formData.append('file', file);
                             uploadImg(formData).then(res => {
                                 // 覆盖掉预览的链接
-                                this.userForm.avatar = res.urls;
+                                this.userForm.avatar = res.data;
                                 editUser(this.userForm).then(res => {
                                     // 更新用户信息
                                     this.$store.commit('setUserInfo', {

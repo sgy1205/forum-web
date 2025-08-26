@@ -6,7 +6,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/', // 默认路由
-    redirect: '/login' // 重定向到index页面
+    redirect: '/index' // 重定向到index页面
   },
   {
     path:'/login',
@@ -27,6 +27,16 @@ const routes = [
     path: '/editmine/:id',
     name: 'EditMine',
     component: () => import('@/views/EditMine')
+  },
+  {
+    path: '/index',
+    name: 'Index',
+    component: () => import('@/views/Index')
+  },
+  {
+    path: '/publish/:id',
+    name: 'Publish',
+    component: () => import('@/views/Publish')
   }
 ]
 

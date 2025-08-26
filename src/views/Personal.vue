@@ -6,7 +6,7 @@
                 <div class="banner" :style="`background-image: url(${this.getBack(this.userInfo.background)})`">
                     <div class="avoid-change">
                         <el-upload :show-file-list="false" :action="uploadImgUrl" :headers="uploadHeaders"
-                            :before-upload="beforeBackUpload" :on-success="handleBackUploadSuccess" name="files">
+                            :before-upload="beforeBackUpload" :on-success="handleBackUploadSuccess" name="file">
                             <div v-show="isCurrentUser" class="set-back tran">
                                 <i class="el-icon-lightning"></i>
                                 设置背景
@@ -390,13 +390,12 @@ export default {
     data() {
         return {
             Loading: false,
-            proxyTarget: process.env.VUE_APP_PROXY_TARGET,
             selectedMsgIds: [],
             isAllSelected: false,
             msgUserAvatars: {},
-            uploadImgUrl: process.env.VUE_APP_PROXY_TARGET + '/common/uploads',
+            uploadImgUrl: 'http://127.0.0.1:12050/uploadfile',
             uploadHeaders: {
-                Authorization: 'Bearer ' + getToken('token'),
+                token: getToken('token'),
             },
             activeTab: 'post',
             activeTabGroup: 'post',
@@ -470,7 +469,7 @@ export default {
             if (avatar.startsWith('http') || avatar.startsWith('https')) {
                 return avatar;
             } else {
-                return this.proxyTarget + avatar;
+                return  avatar;
             }
         },
         getBack(background) {
@@ -480,7 +479,7 @@ export default {
             if (background.startsWith('http') || background.startsWith('https')) {
                 return background;
             } else {
-                return this.proxyTarget + background;
+                return background;
             }
         },
         time,
@@ -595,7 +594,7 @@ export default {
             return true;
         },
         handleBackUploadSuccess(res) {
-            const url = res.fileNames;
+            const url = res.data;
             if (!url) {
                 this.$message.error('上传失败');
                 return;
@@ -606,7 +605,7 @@ export default {
             userBack({ background: url }).then(res => {
                 this.$message.success('背景设置成功');
                 curUser(this.curId).then(res => {
-                    this.userInfo.background = res.data.background.startsWith('http') || res.data.background.startsWith('https') ? res.data.background : process.env.VUE_APP_PROXY_TARGET + res.data.background;
+                    this.userInfo.background = res.data.background.startsWith('http') || res.data.background.startsWith('https') ? res.data.background : res.data.background;
                 }).catch(err => {
                 });
             }).catch(err => {

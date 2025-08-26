@@ -16,7 +16,7 @@
                         <el-form-item prop="search">
                             <div class="search tran">
                                 <input class="search-input tran" v-model="queryForm.search" placeholder="请输入你想查找的内容"
-                                    @keyup.enter="handleQuery(queryForm)"></input>
+                                    @keyup.enter="handleQuery(queryForm)">
                                 <button type="button" class="search-button tran" @click="handleQuery(queryForm)">
                                     <i class="el-icon-search"></i>
                                 </button>
@@ -91,7 +91,7 @@ export default {
     data() {
         return {
             queryForm: {
-                search: undefined
+                search: this.$route.query.searchContent || '',
             },
             rules: {
                 search: [
@@ -170,20 +170,19 @@ export default {
         handleQuery(queryForm) {
             const hasInput = query(queryForm)
 
-            if (!hasInput) return this.$message.warning('请输入要查询的信息！')
-
             const newQuery = { searchContent: queryForm.search };
             if (
-                this.$route.path === '/search' &&
+                this.$route.path === '/index' &&
                 this.$route.query.searchContent === queryForm.search
             ) {
                 return;
             }
 
-            if (this.$route.path !== '/search') {
-                this.$router.push({ path: '/search', query: newQuery });
+            if (this.$route.path !== '/index') {
+                if (!hasInput) return this.$message.warning('请输入要查询的信息！')
+                this.$router.push({ path: '/index', query: newQuery });
             } else {
-                this.$router.replace({ path: '/search', query: newQuery });
+                this.$router.replace({ path: '/index', query: newQuery });
             }
         },
         goLogin() {

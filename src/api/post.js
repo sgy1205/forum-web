@@ -43,10 +43,9 @@ export function allPost(data) {
  */
 export function addPost(data) {
     return request({
-        url: '/user/post/add',
+        url: '/post',
         method: 'post',
-        data,
-        headers: { 'Content-Type': 'application/json' }
+        data
     })
 }
 
@@ -73,5 +72,42 @@ export function deletePost(id) {
     return request({
         url: `/user/post/${id}`,
         method: 'delete'
+    })
+}
+
+/**
+ * 获取推荐标签
+ * @returns 
+ */
+export function getRecommendTags() {
+    return request({
+        url: '/tags',
+        method: 'get'
+    })
+}
+
+/**
+ * 添加标签
+ * @param {*} data 
+ * @returns 
+ */
+export function addTags(data) {
+    return request({
+        url: '/tags',
+        method: 'post',
+        data
+    })
+}
+
+/**
+ * 查询标签
+ * @param {*} params 
+ * @returns 
+ */
+export function searchTags(params) {
+    return request({
+        url: '/tags/select',
+        method: 'get',
+        params
     })
 }

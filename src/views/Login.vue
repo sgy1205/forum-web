@@ -192,7 +192,7 @@ export default {
                             localStorage.setItem('concernListVos', JSON.stringify(res.data.concernListVos || []));
                             localStorage.setItem('background', res.data.background || require('@/assets/images/back4.jpg'));
                             this.$message.success(res.msg);
-                            this.$router.push(`/personal/${this.userId}`);
+                            this.$router.push(`/index`);
                         }).catch(err => {
                             console.log(err);
 

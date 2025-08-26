@@ -6,7 +6,7 @@ import request from '@/utils/request'
  */
 export function follow(useId) {
     return request({
-        url: `/concern/${userId}`,
+        url: `/concern/${useId}`,
         method: 'put'
     })
 }
@@ -18,7 +18,7 @@ export function follow(useId) {
  */
 export function userBack(params) {
     return request({
-        url: '/personalCenter/background',
+        url: '/userCenter/updateUserBackground',
         method: 'put',
         params
     })
@@ -31,7 +31,7 @@ export function userBack(params) {
  */
 export function uploadImg(data) {
     return request({
-        url: '/common/uploads',
+        url: '/uploadfile',
         method: 'post',
         data,
     })
