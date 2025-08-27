@@ -37,6 +37,11 @@ const routes = [
     path: '/publish/:id',
     name: 'Publish',
     component: () => import('@/views/Publish')
+  },
+  {
+    path: '/detail/:id',
+    name: 'Detail',
+    component: () => import('@/views/Detail')
   }
 ]
 

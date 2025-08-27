@@ -91,16 +91,18 @@ export default {
             // 基础状态
             loading: false,
             curUserId: this.$store.state.user.user.id || localStorage.getItem('userId') || '',
-            
+
             // 1. Node选择相关（顶部Tab）
             nodeTabs: [
                 { label: '全部', value: 'all' },
                 { label: '日常', value: 'daily' },
-                { label: '提问', value: 'question' },
-                { label: '开源', value: 'open_source' },
+                { label: '工作', value: 'work' },
+                { label: '游戏', value: 'game' },
                 { label: '摸鱼', value: 'fishing' },
-                { label: '妹子图', value: 'girl_picture' },
-                { label: '反馈', value: 'feedback' }
+                { label: '美图', value: 'beauty_picture' },
+                { label: '交流', value: 'exchange' },
+                { label: '旅游', value: 'travel' },
+                { label: '提问', value: 'questions' },
             ],
             activeNode: 'all', // 当前选中的Node
             timeFrame: 0, // 时间筛选：0-不限，3-最近
@@ -277,7 +279,7 @@ export default {
         border-bottom: 1px solid #eeeeee;
         padding-bottom: 8px;
         margin-top: 5px;
-        
+
 
         .tab-item {
             font-size: 16px;

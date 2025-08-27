@@ -72,15 +72,3 @@ export function isContentChanged(draft, current) {
         draft.node !== current.node
     );
 }
-
-export function sonEdit(ref, list, type, that, authorId) {
-    ref.validate(valid => {
-        if (valid) {
-            list.createTime = new Date().toISOString();
-            that.$emit('edit', type, list);
-            clearDraft(type + 'Draft');
-        } else {
-            that.$message.error('请检查内容是否符合要求');
-        }
-    });
-}

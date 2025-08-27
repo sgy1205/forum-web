@@ -13,26 +13,13 @@ export function postList(params) {
 }
 /**
  * 获取帖子详情
- * @param {*} data 
+ * @param {*} postId 
  * @returns 
  */
-export function postDetail(data) {
+export function postDetail(postId) {
     return request({
-        url: '/user/post',
-        method: 'post',
-        data,
-        headers: { 'Content-Type': 'application/json' }
-    })
-}
-/**
- * 获取所有帖子
- * @returns 
- */
-export function allPost(data) {
-    return request({
-        url: '/user/post/lists',
-        method: 'post',
-        data
+        url: `/post/detail/${postId}`,
+        method: 'get',
     })
 }
 
@@ -56,10 +43,9 @@ export function addPost(data) {
  */
 export function updatePost(data) {
     return request({
-        url: '/user/post/update',
+        url: '/post',
         method: 'put',
-        data,
-        headers: { 'Content-Type': 'application/json' }
+        data
     })
 }
 
@@ -70,7 +56,7 @@ export function updatePost(data) {
  */
 export function deletePost(id) {
     return request({
-        url: `/user/post/${id}`,
+        url: `/post/${id}`,
         method: 'delete'
     })
 }
@@ -88,14 +74,14 @@ export function getRecommendTags() {
 
 /**
  * 添加标签
- * @param {*} data 
+ * @param {*} params 
  * @returns 
  */
-export function addTags(data) {
+export function addTags(params) {
     return request({
         url: '/tags',
         method: 'post',
-        data
+        params
     })
 }
 

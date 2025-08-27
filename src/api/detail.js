@@ -13,12 +13,12 @@ export function like(data) {
 }
 /**
  * 修改收藏状态
- * @param {*} userId
+ * @param {*} postId
  * @returns 
  */
-export function collect(userId) {
+export function collect(postId) {
     return request({
-        url: `/collection/${userId}`,
+        url: `/collection/${postId}`,
         method: 'post'
     })
 }
