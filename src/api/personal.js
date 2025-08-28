@@ -129,7 +129,7 @@ export function followList(params) {
  */
 export function msgList(params) {
     return request({
-        url: '/notifications/list',
+        url: '/notification/list',
         method: 'get',
         params
     })
@@ -154,7 +154,7 @@ export function msgHasRead() {
 
 export function readMsg() {
     return request({
-        url: `/notifications/read/all`,
+        url: `/notification/readAll`,
         method: 'post',
     })
 }
@@ -163,17 +163,16 @@ export function readMsg() {
  * 修改为已读
  * @returns 
  */
-export function setRead(params) {
+export function setRead(id) {
     return request({
-        url: `/notifications/read/status`,
-        method: 'put',
-        params
+        url: `/notification/${id}`,
+        method: 'put'
     })
 }
 
 export function deleteMsg(data) {
     return request({
-        url: `/notifications/delete`,
+        url: `/notification`,
         method: 'delete',
         data
     })

@@ -141,6 +141,17 @@
                                     <div class="mark-read cursor" @click="allRead">全部标记为已读☝️</div>
                                 </div>
                             </div>
+
+                            <!-- 新增：消息分类切换导航栏 -->
+                            <div class="msg-type-tabs" style="margin: 12px 0; border-radius: 4px; overflow: hidden;">
+                                <el-tabs v-model="currentMsgType" @tab-click="handleMsgTypeChange" type="card"
+                                    style="width: 100%;">
+                                    <el-tab-pane label="全部" name="all"></el-tab-pane>
+                                    <el-tab-pane label="系统消息" name="0"></el-tab-pane>
+                                    <el-tab-pane label="互动消息" name="1"></el-tab-pane>
+                                </el-tabs>
+                            </div>
+
                             <el-divider></el-divider>
                             <el-empty v-if="msgList.length === 0" description="暂无消息记录"></el-empty>
                             <div v-else class="message-col">
@@ -153,8 +164,8 @@
                                 </div>
                                 <div v-for="(item, index) in msgList" :key="index">
                                     <div class="message-item">
-                                        <el-checkbox :value="selectedMsgIds.includes(item.messageId)"
-                                            @change="checked => handleSelectMsg(item.messageId, checked)"
+                                        <el-checkbox :value="selectedMsgIds.includes(item.notificationId)"
+                                            @change="checked => handleSelectMsg(item.notificationId, checked)"
                                             style="margin-right: 10px;" />
                                         <div class="avatar-window">
                                             <img :src="getAvatar(item.avatar)" class="avatar" alt="">
@@ -163,42 +174,45 @@
                                             <div class="message-row">
                                                 <div style="display: flex;gap: 10px;">
                                                     <div class="message-time">{{ time(item.createTime) }}</div>
-                                                    <div v-if="item.typeCode == 0" class="msg">
-                                                        你的内容有新消息！</div>
-                                                    <div v-if="item.typeCode == 1" class="msg">
-                                                        你的帖子有新消息！</div>
-                                                    <div v-if="item.typeCode == 2" class="msg">
-                                                        你的评论有新消息！</div>
-                                                    <div v-if="item.typeCode == 3" class="msg">
+                                                    <div v-if="item.relatedType == 0" class="msg">
                                                         有人关注了你！</div>
+                                                    <div v-if="item.relatedType == 1" class="msg">
+                                                        你的帖子有新消息！</div>
+                                                    <div v-if="item.relatedType == 2" class="msg">
+                                                        你的评论有新消息！</div>
+                                                    <div v-if="item.type == 0 && item.relatedId == null" class="msg">
+                                                        系统信息！</div>
                                                 </div>
                                                 <el-tag type="danger" v-if="item.readStatus == 0">未读</el-tag>
                                             </div>
                                             <div class="vector tran"></div>
                                             <div class="message-about tran">
-                                                <div class="message-content">{{ item.content }}</div>
+                                                <div class="message-message">{{ item.message }}</div>
                                             </div>
                                             <div
                                                 style="display: flex;justify-content: space-between;align-items: center; margin-top: 10px;">
                                                 <!-- 关注 -->
-                                                <div v-show="item.typeCode == 3" class="message-href cursor"
-                                                    @click="goPersonal(item.operatorId, item.readStatus, item.messageId)">
+                                                <div v-show="item.relatedType == 0" class="message-href cursor"
+                                                    @click="goPersonal(item.relatedId, item.readStatus, item.notificationId)">
                                                     去他的主页看看>></div>
-                                                <!-- 帖子评论 -->
-                                                <div v-show="item.typeCode == 2 && item.type.includes('POST')"
-                                                    class="message-href cursor"
-                                                    @click="goDetail(item.id, type = 'post', item.readStatus, item.messageId)">
+                                                <!-- 帖子 -->
+                                                <div v-show="item.relatedType == 1" class="message-href cursor"
+                                                    @click="goDetail(item.relatedId, item.readStatus, item.notificationId)">
                                                     点击查看详情>>
                                                 </div>
-                                                <!-- 帖子 -->
-                                                <div v-show="item.typeCode == 1 && item.type != 'POST_DELETED'"
-                                                    class="message-href cursor"
-                                                    @click="goDetail(item.id, type = 'post', item.readStatus, item.messageId)">
+                                                <!-- 帖子评论 -->
+                                                <div v-show="item.relatedType == 2" class="message-href cursor"
+                                                    @click="goDetail(item.carrierId, item.readStatus, item.notificationId)">
                                                     点击查看详情>>
+                                                </div>
+                                                <div v-show="item.relatedId == null && item.type == 0"
+                                                    class="message-href cursor"
+                                                    @click="handleReadMsg(item.notificationId)">
+                                                    点击已读>>
                                                 </div>
                                                 <div class="cursor"
                                                     style="margin-left:10px;color: gray;flex:1 ;text-align: end;"
-                                                    @click="deleteSingleMsg(item.messageId)">删除🗑️
+                                                    @click="deleteSingleMsg(item.notificationId)">删除🗑️
                                                 </div>
                                             </div>
                                         </div>
@@ -221,15 +235,11 @@
                                             <i class="el-icon-chat-line-square tab-icon"></i>全部
                                         </span>
                                         <div v-if="collectList.length !== 0">
-                                            <PostItem
-                                                v-for="(PostItem, index) in collectList"
-                                                :key="index" :item="PostItem" :author-id="PostItem.userId"
+                                            <PostItem v-for="(PostItem, index) in collectList" :key="index"
+                                                :item="PostItem" :author-id="PostItem.userId"
                                                 :current-user-id="curId" />
-                                            <LoadMore
-                                                :length="collectList.length"
-                                                :pagination="collectPagination" 
-                                                @load-more="loadMore('collect')"
-                                                @retract="retract('collect')" />
+                                            <LoadMore :length="collectList.length" :pagination="collectPagination"
+                                                @load-more="loadMore('collect')" @retract="retract('collect')" />
                                         </div>
                                         <el-empty v-else description="暂无话题"></el-empty>
                                     </el-tab-pane>
@@ -362,7 +372,24 @@ export default {
                     this.pointsPagination.total = pointsRes.total;
                 } else if (val === 'message') {
                     this.activeTabGroup = 'message';
-                    const msgRes = await msgList({ pageNum: this.msgListPagination.pageNum, pageSize: this.msgListPagination.pageSize });
+                    // 重置消息类型为全部，重置分页
+                    this.currentMsgType = 'all';
+                    this.msgListPagination = {
+                        pageNum: 1,
+                        pageSize: 5,
+                        total: 0
+                    };
+
+                    // 构造初始请求参数
+                    const params = {
+                        pageNum: this.msgListPagination.pageNum,
+                        pageSize: this.msgListPagination.pageSize
+                    };
+                    if (this.currentMsgType !== 'all') {
+                        params.type = this.currentMsgType;
+                    }
+
+                    const msgRes = await msgList(params);
                     this.msgList = msgRes.rows || [];
                     this.msgListPagination.total = msgRes.total;
                     this.getUnread();
@@ -443,6 +470,8 @@ export default {
                 pageSize: 5,
                 total: 0,
             },
+            // 新增：当前选中的消息类型（all=全部，0=系统消息，1=互动消息）
+            currentMsgType: 'all',
         }
     },
     created() {
@@ -469,7 +498,7 @@ export default {
             if (avatar.startsWith('http') || avatar.startsWith('https')) {
                 return avatar;
             } else {
-                return  avatar;
+                return avatar;
             }
         },
         getBack(background) {
@@ -495,7 +524,7 @@ export default {
         },
         toggleSelectAll(checked) {
             if (checked) {
-                this.selectedMsgIds = this.msgList.map(item => item.messageId);
+                this.selectedMsgIds = this.msgList.map(item => item.notificationId);
             } else {
                 this.selectedMsgIds = [];
             }
@@ -506,8 +535,9 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deleteMsg({ ids: [id] }).then(res => {
+                deleteMsg([id]).then(res => {
                     this.$message.success('删除成功');
+                    this.getUnread();
                     this.reloadMsgList();
                 }).catch(err => {
                 });
@@ -521,7 +551,7 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deleteMsg({ ids: this.selectedMsgIds }).then(res => {
+                deleteMsg(this.selectedMsgIds).then(res => {
                     this.selectedMsgIds = [];
                     this.isAllSelected = false;
                     this.$message.success('批量删除成功');
@@ -530,10 +560,22 @@ export default {
             });
         },
         reloadMsgList() {
-            msgList({ pageNum: this.msgListPagination.pageNum, pageSize: this.msgListPagination.pageSize }).then(res => {
+            // 构造请求参数：根据当前消息类型决定是否添加 type
+            const params = {
+                pageNum: this.msgListPagination.pageNum,
+                pageSize: this.msgListPagination.pageSize
+            };
+            // 只有「非全部」类型才添加 type 参数（0=系统，1=互动）
+            if (this.currentMsgType !== 'all') {
+                params.type = this.currentMsgType;
+            }
+
+            msgList(params).then(res => {
                 this.msgList = res.rows || [];
                 this.msgListPagination.total = res.total;
                 this.getUnread();
+            }).catch(err => {
+                console.error('加载消息列表失败：', err);
             });
         },
         allRead() {
@@ -545,6 +587,7 @@ export default {
                 readMsg().then(res => {
                     this.$message.success('已标记为已读');
                     this.getUnread();
+                    this.reloadMsgList();
                 }).catch(err => {
                 });
             }).catch(() => {
@@ -557,9 +600,9 @@ export default {
             }).catch(err => {
             });
         },
-        goPersonal(operatorId, readStatus, messageId) {
+        goPersonal(operatorId, readStatus, notificationId) {
             if (readStatus == 0) {
-                setRead({ id: messageId }).then(res => {
+                setRead(notificationId).then(res => {
                     this.getUnread();
                     this.$router.push(`/personal/${operatorId}`);
                 }).catch(err => {
@@ -568,9 +611,10 @@ export default {
                 this.$router.push(`/personal/${operatorId}`);
             }
         },
-        goDetail(id, type, readStatus, messageId) {
+        goDetail(id, readStatus, notificationId) {
+            let type = 'post';
             if (readStatus == 0) {
-                setRead({ id: messageId }).then(res => {
+                setRead(notificationId).then(res => {
                     this.getUnread();
                     this.$router.push({
                         path: `/detail/${this.curId}`,
@@ -584,6 +628,13 @@ export default {
                     query: { type, [`${type}Id`]: id }
                 });
             }
+        },
+        handleReadMsg(notificationId) {
+            setRead(notificationId).then(res => {
+                this.getUnread();
+                this.reloadMsgList();
+            }).catch(err => {
+            });
         },
         beforeBackUpload(file) {
             const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(file.name);
@@ -615,9 +666,7 @@ export default {
             this.$router.push(`/editmine/${this.userId}`);
         },
         handleFollow() {
-            follow({
-                concernUserId: this.curId,
-            }).then(res => {
+            follow(this.curId,).then(res => {
                 this.fansListPagination.pageNum = 1;
                 this.followListPagination.pageNum = 1;
                 this.fansListPagination.pageSize = 5;
@@ -727,10 +776,21 @@ export default {
                     return;
                 }
                 this.msgListPagination.pageSize += 5;
-                msgList({ pageNum: this.msgListPagination.pageNum, pageSize: this.msgListPagination.pageSize }).then(res => {
+
+                // 构造带类型的请求参数
+                const params = {
+                    pageNum: this.msgListPagination.pageNum,
+                    pageSize: this.msgListPagination.pageSize
+                };
+                if (this.currentMsgType !== 'all') {
+                    params.type = this.currentMsgType;
+                }
+
+                msgList(params).then(res => {
                     this.msgList = res.rows || [];
                     this.msgListPagination.total = res.total;
                 }).catch(err => {
+                    console.error('加载更多消息失败：', err);
                 });
             }
         },
@@ -746,7 +806,7 @@ export default {
             } else if (type === 'fans') {
                 this.fansListPagination.pageSize = 5;
                 this.fansListPagination.pageNum = 1;
-                fansList({ userId: this.userId,pageNum: this.fansListPagination.pageNum, pageSize: this.fansListPagination.pageSize }).then(res => {
+                fansList({ userId: this.userId, pageNum: this.fansListPagination.pageNum, pageSize: this.fansListPagination.pageSize }).then(res => {
                     this.moreFansList = res.rows;
                     this.fansListPagination.total = res.total;
                 }).catch(err => {
@@ -754,7 +814,7 @@ export default {
             } else if (type === 'follow') {
                 this.followListPagination.pageSize = 5;
                 this.followListPagination.pageNum = 1;
-                followList({userId: this.userId, pageNum: this.followListPagination.pageNum, pageSize: this.followListPagination.pageSize, userId: this.userId }).then(res => {
+                followList({ userId: this.userId, pageNum: this.followListPagination.pageNum, pageSize: this.followListPagination.pageSize, userId: this.userId }).then(res => {
                     this.moreFollowList = res.rows;
                     this.followListPagination.total = res.total;
                 }).catch(err => {
@@ -778,10 +838,21 @@ export default {
             } else if (type === 'msg') {
                 this.msgListPagination.pageSize = 5;
                 this.msgListPagination.pageNum = 1;
-                msgList({ pageNum: this.msgListPagination.pageNum, pageSize: this.msgListPagination.pageSize }).then(res => {
+
+                // 构造带类型的请求参数
+                const params = {
+                    pageNum: this.msgListPagination.pageNum,
+                    pageSize: this.msgListPagination.pageSize
+                };
+                if (this.currentMsgType !== 'all') {
+                    params.type = this.currentMsgType;
+                }
+
+                msgList(params).then(res => {
                     this.msgList = res.rows || [];
                     this.msgListPagination.total = res.total;
                 }).catch(err => {
+                    console.error('收回消息列表失败：', err);
                 });
             }
         },
@@ -810,15 +881,29 @@ export default {
             }
             this.$router.push({ path: `/personal/${this.userId}`, query: { tab: 'points' } });
             this.activeTabGroup = 'points';
+        },
+        // 新增：消息类型切换事件
+        handleMsgTypeChange() {
+            // 重置消息分页
+            this.msgListPagination = {
+                pageNum: 1,
+                pageSize: 5,
+                total: 0
+            };
+            // 清空旧消息列表
+            this.msgList = [];
+            // 重新加载当前类型的消息
+            this.reloadMsgList();
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.content-list{
+.content-list {
     width: 100%;
 }
+
 // 全局居中样式
 .top-down {
     display: flex;
@@ -1045,11 +1130,12 @@ body.dark {
                 justify-content: center;
                 gap: 10px;
 
-                .user-name-row{
+                .user-name-row {
                     display: flex;
                     justify-content: space-between;
                     padding: 0px 0 0px 0;
                 }
+
                 .user-signature-row {
                     display: flex;
                     justify-content: space-between;
@@ -1145,8 +1231,9 @@ body.dark {
                     font-size: 14px;
                 }
 
-                .message-content {
+                .message-message {
                     margin-left: 20px;
+                    text-align: left;
                 }
 
                 .vector {
@@ -1171,12 +1258,31 @@ body.dark {
                 }
 
                 .message-href {
+                    text-align: left;
                     flex: 1;
                     display: inline-block;
                     text-decoration: none;
                     color: #296cff;
                 }
             }
+        }
+    }
+}
+
+// 消息分类tabs样式
+.msg-type-tabs {
+    .el-tabs--card {
+        .el-tabs__header {
+            margin: 0;
+        }
+
+        .el-tabs__item {
+            padding: 8px 24px;
+            font-size: 14px;
+        }
+
+        .el-tabs__active-bar {
+            background-color: #296cff;
         }
     }
 }
