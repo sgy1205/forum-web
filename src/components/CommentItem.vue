@@ -79,14 +79,14 @@
                         <div class="load-more tran" @click="loadMoreChildren">
                             显示更多 <i class="el-icon-arrow-down"></i>
                         </div>
-                        <div class="load-more tran" @click="showChildren = false">
+                        <div class="load-more tran" @click="retractChildren">
                             收起评论 <i class="el-icon-arrow-up"></i>
                         </div>
                     </div>
 
                     <!-- 所有子评论已显示：中间显示收起按钮 -->
                     <div v-else class="center-control">
-                        <div class="load-more tran" @click="showChildren = false">
+                        <div class="load-more tran" @click="retractChildren">
                             收起评论 <i class="el-icon-arrow-up"></i>
                         </div>
                     </div>
@@ -341,6 +341,11 @@ export default {
             if (this.displayCount > this.comment.children.length) {
                 this.displayCount = this.comment.children.length;
             }
+        },
+        //收起评论
+        retractChildren() {
+            this.showChildren = false;
+            this.displayCount = 5;
         }
     }
 };
